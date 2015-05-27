@@ -3,6 +3,8 @@
 # syntax:
 # extract_strings.sh [--mailer-repo ./fxa-auth-mailer] [--content-repo ./fxa-content-server] [--l10n-repo ./fxa-content-server-l10n] train_number
 
+set -e
+
 function usage() {
     echo "syntax:"
     echo "extract_strings.sh [--mailer-repo ./fxa-auth-mailer] [--content-repo ./fxa-content-server] [--l10n-repo ./fxa-content-server-l10n] train_number"
@@ -61,8 +63,6 @@ printf "Checking existence of fxa-content-server : $CONTENT_DIR.. "
 check_folder $CONTENT_DIR
 printf "Checking existence of fxa-content-server-l10n : $L10N_DIR.. "
 check_folder $L10N_DIR
-
-set -x
 
 (cd $MAILER_DIR && grunt l10n-extract) &&
 cp $MAILER_DIR/server.pot $CONTENT_DIR/locale/templates/LC_MESSAGES/ &&
