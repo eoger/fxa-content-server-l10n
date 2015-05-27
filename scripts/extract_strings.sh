@@ -13,7 +13,7 @@ function usage() {
 
 function check_folder() {
     if [[ ! -d $1 ]]; then
-        echo "Error!"
+        echo "Error: No such directory"
         exit 1
     else
         echo "Ok!"
@@ -57,22 +57,27 @@ fi
 
 TRAIN_NUMBER=$1
 
-printf "Checking existence of fxa-auth-mailer : $MAILER_DIR.. "
+printf "Checking $MAILER_DIR.. "
 check_folder $MAILER_DIR
-printf "Checking existence of fxa-content-server : $CONTENT_DIR.. "
+printf "Checking $CONTENT_DIR.. "
 check_folder $CONTENT_DIR
-printf "Checking existence of fxa-content-server-l10n : $L10N_DIR.. "
+printf "Checking $L10N_DIR.. "
 check_folder $L10N_DIR
 
-(cd $MAILER_DIR && grunt l10n-extract) &&
-cp $MAILER_DIR/server.pot $CONTENT_DIR/locale/templates/LC_MESSAGES/ &&
+set -x
 
-(cd $CONTENT_DIR && grunt l10n-extract) &&
-cp -r $CONTENT_DIR/locale/templates/ $L10N_DIR/locale/templates &&
+(cd $MAILER_DIR && grunt l10n-extract)
+cp $MAILER_DIR/server.pot $CONTENT_DIR/locale/templates/LC_MESSAGES/
 
-cd $L10N_DIR &&
-git checkout -b merge-train-$TRAIN_NUMBER-strings &&
-./scripts/merge_po.sh ./locale &&
-git add . &&
-git commit -m "merge strings for train $TRAIN_NUMBER" &&
+(cd $CONTENT_DIR && grunt l10n-extract)
+cp -r $CONTENT_DIR/locale/templates/ $L10N_DIR/locale/templates
+
+cd $L10N_DIR
+git checkout -b merge-train-$TRAIN_NUMBER-strings
+./scripts/merge_po.sh ./locale
+git add .
+git commit -m "merge strings for train $TRAIN_NUMBER"
 git push origin merge-train-$TRAIN_NUMBER-strings
+
+echo "Everything seems to be in order. Please check the extraction went okay then you can push the new branch with:"
+echo "cd $L10N_DIR && git push origin merge-train-$TRAIN_NUMBER-strings"
